@@ -1,0 +1,60 @@
+<?php
+
+return [
+
+    /*
+    |--------------------------------------------------------------------------
+    | Default Broadcaster
+    |--------------------------------------------------------------------------
+    |
+    | Laravel supports several broadcasting drivers: "pusher", "ably", "redis",
+    | "log", and "null". You may specify which one you are using here.
+    |
+    */
+
+    'default' => env('BROADCAST_DRIVER', 'null'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Broadcast Connections
+    |--------------------------------------------------------------------------
+    |
+    | Here you may define all of the broadcast connections that will be used
+    | to broadcast events to other systems or over websockets.
+    |
+    */
+
+    'connections' => [
+
+        'pusher' => [
+            'driver' => 'pusher',
+            'key' => env('PUSHER_APP_KEY'),
+            'secret' => env('PUSHER_APP_SECRET'),
+            'app_id' => env('PUSHER_APP_ID'),
+            'options' => [
+                'cluster' => env('PUSHER_APP_CLUSTER'),
+                'useTLS' => true,
+            ],
+        ],
+
+        'ably' => [
+            'driver' => 'ably',
+            'key' => env('ABLY_KEY'),
+        ],
+
+        'redis' => [
+            'driver' => 'redis',
+            'connection' => 'default',
+        ],
+
+        'log' => [
+            'driver' => 'log',
+        ],
+
+        'null' => [
+            'driver' => 'null',
+        ],
+
+    ],
+
+];
