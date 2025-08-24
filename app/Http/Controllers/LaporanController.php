@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\OrderDetail;
+use App\Models\Laporan;
 use Illuminate\Http\Request;
 
-class OrderDetailController extends Controller
+class LaporanController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -34,7 +34,7 @@ class OrderDetailController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(OrderDetail $orderDetail)
+    public function show(Laporan $laporan)
     {
         //
     }
@@ -42,7 +42,7 @@ class OrderDetailController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(OrderDetail $orderDetail)
+    public function edit(Laporan $laporan)
     {
         //
     }
@@ -50,7 +50,7 @@ class OrderDetailController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, OrderDetail $orderDetail)
+    public function update(Request $request, Laporan $laporan)
     {
         //
     }
@@ -58,7 +58,7 @@ class OrderDetailController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(OrderDetail $orderDetail)
+    public function destroy(Laporan $laporan)
     {
         //
     }

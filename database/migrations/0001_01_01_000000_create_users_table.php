@@ -17,7 +17,11 @@ return new class extends Migration
             $table->string('password');
 
             // Role user (admin, waiter, koki, kasir, cleaning)
-            $table->enum('role', ['admin', 'waiter', 'koki', 'kasir', 'cleaning'])->default('waiter');
+            $table->enum('role', ['admin', 'waiter', 'koki', 'cleaning'])->default('waiter');
+            $table->decimal('gaji_pokok', 15, 2)->default(0);
+            $table->decimal('lembur_per_jam', 15, 2)->default(0);
+            $table->time('jam_masuk')->nullable();
+            $table->time('jam_keluar')->nullable();
 
             // Data tambahan
             $table->string('phone')->nullable();
