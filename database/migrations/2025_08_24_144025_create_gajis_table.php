@@ -6,25 +6,23 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
-    public function up()
+    public function up(): void
     {
-        Schema::create('gaji', function (Blueprint $table) {
+        Schema::create('gajis', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-            $table->decimal('gaji_pokok', 15, 2);
-            $table->decimal('lembur', 15, 2)->default(0);
-            $table->decimal('total_gaji', 15, 2);
-            $table->string('bulan');
+            $table->foreignId('user_id')->constrained()->onDelete('cascade'); // Pegawai
+            $table->integer('total_hadir')->default(0); // Jumlah kehadiran
+            $table->integer('total_jam_kerja')->default(0); // Dalam menit
+            $table->integer('total_lembur')->default(0); // Dalam menit
+            $table->decimal('gaji_pokok', 15, 2)->default(0);
+            $table->decimal('uang_lembur', 15, 2)->default(0);
+            $table->decimal('total_gaji', 15, 2)->default(0);
+            $table->date('periode_gaji');
+            $table->enum('status', ['belum_dibayar', 'dibayar'])->default('belum_dibayar');
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('gajis');

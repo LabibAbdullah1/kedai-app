@@ -2,64 +2,83 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Controller;
 use App\Models\Pelanggan;
+use App\Models\Pesanan;
 use Illuminate\Http\Request;
 
 class PelangganController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    // Menampilkan daftar pelanggan
+    public function index(Request $request)
     {
-        //
+        $search = $request->input('search');
+        $pelanggan = Pelanggan::when($search, function ($query) use ($search) {
+            $query->where('nama', 'like', "%$search%")
+                ->orWhere('no_hp', 'like', "%$search%");
+        })->orderBy('created_at', 'desc')->paginate(10);
+
+        return view('admin.pelanggan.index', compact('pelanggan', 'search'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
+    // Form tambah pelanggan
     public function create()
     {
-        //
+        return view('admin.pelanggan.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
+    // Simpan pelanggan baru
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'nama' => 'required|string|max:255',
+            'no_hp' => 'required|string|max:15',
+            'alamat' => 'nullable|string',
+        ]);
+
+        Pelanggan::create($request->all());
+
+        return redirect()->route('pelanggan.index')->with('success', 'Pelanggan berhasil ditambahkan');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Pelanggan $pelanggan)
+    // Detail riwayat pesanan pelanggan
+    public function show($id)
     {
-        //
+        $pelanggan = Pelanggan::findOrFail($id);
+        $riwayatPesanan = Pesanan::where('pelanggan_id', $id)->latest()->get();
+
+        return view('admin.pelanggan.show', compact('pelanggan', 'riwayatPesanan'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Pelanggan $pelanggan)
+    // Form edit pelanggan
+    public function edit($id)
     {
-        //
+        $pelanggan = Pelanggan::findOrFail($id);
+        return view('admin.pelanggan.edit', compact('pelanggan'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Pelanggan $pelanggan)
+    // Update pelanggan
+    public function update(Request $request, $id)
     {
-        //
+        $pelanggan = Pelanggan::findOrFail($id);
+
+        $request->validate([
+            'nama' => 'required|string|max:255',
+            'no_hp' => 'required|string|max:15',
+            'alamat' => 'nullable|string',
+        ]);
+
+        $pelanggan->update($request->all());
+
+        return redirect()->route('pelanggan.index')->with('success', 'Pelanggan berhasil diperbarui');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Pelanggan $pelanggan)
+    // Hapus pelanggan
+    public function destroy($id)
     {
-        //
+        $pelanggan = Pelanggan::findOrFail($id);
+        $pelanggan->delete();
+
+        return redirect()->route('pelanggan.index')->with('success', 'Pelanggan berhasil dihapus');
     }
 }

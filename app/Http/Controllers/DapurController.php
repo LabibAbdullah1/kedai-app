@@ -2,64 +2,44 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Dapur;
+use App\Http\Controllers\Controller;
+use App\Models\Pesanan;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Broadcast;
 
 class DapurController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    // Menampilkan daftar pesanan untuk koki
     public function index()
     {
-        //
+        $pesanan = Pesanan::with('menu', 'meja', 'pelanggan')
+            ->orderBy('created_at', 'desc')
+            ->where('status', '!=', 'Selesai')
+            ->paginate(10);
+
+        return view('admin.dapur.index', compact('pesanan'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    // Update status pesanan menjadi "Siap Diambil"
+    public function updateStatus($id)
     {
-        //
+        $pesanan = Pesanan::findOrFail($id);
+        $pesanan->update(['status' => 'Siap Diambil']);
+
+        // Broadcast event realtime ke pelayan
+        broadcast(new \App\Events\PesananSiapEvent($pesanan))->toOthers();
+
+        return redirect()->back()->with('success', 'Pesanan siap diambil');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    // Menampilkan riwayat pesanan
+    public function riwayat()
     {
-        //
-    }
+        $riwayat = Pesanan::with('menu', 'meja', 'pelanggan')
+            ->where('status', 'Selesai')
+            ->orderBy('updated_at', 'desc')
+            ->paginate(10);
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Dapur $dapur)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Dapur $dapur)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Dapur $dapur)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Dapur $dapur)
-    {
-        //
+        return view('admin.dapur.riwayat', compact('riwayat'));
     }
 }

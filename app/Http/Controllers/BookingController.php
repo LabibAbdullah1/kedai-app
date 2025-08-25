@@ -3,63 +3,43 @@
 namespace App\Http\Controllers;
 
 use App\Models\Booking;
+use App\Models\Meja;
 use Illuminate\Http\Request;
 
 class BookingController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
+        $booking = Booking::with(['pelanggan', 'meja'])->latest()->get();
+        $meja = Meja::all();
+        return view('booking.index', compact('booking', 'meja'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
-    }
+        $request->validate([
+            'pelanggan_id' => 'required',
+            'meja_id' => 'required',
+            'booking_mulai' => 'required|date',
+            'booking_selesai' => 'required|date|after:booking_mulai'
+        ]);
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Booking $booking)
-    {
-        //
-    }
+        // Cek apakah meja sudah dibooking pada jam tersebut
+        $exists = Booking::where('meja_id', $request->meja_id)
+            ->where('booking_mulai', '<=', $request->booking_selesai)
+            ->where('booking_selesai', '>=', $request->booking_mulai)
+            ->exists();
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Booking $booking)
-    {
-        //
-    }
+        if ($exists) {
+            return redirect()->back()->with('error', 'Meja sudah dibooking di jam tersebut');
+        }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Booking $booking)
-    {
-        //
-    }
+        $booking = Booking::create($request->all());
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Booking $booking)
-    {
-        //
+        $meja = Meja::find($request->meja_id);
+        $meja->status = 'dibooking';
+        $meja->save();
+
+        return redirect()->back()->with('success', 'Booking meja berhasil');
     }
 }

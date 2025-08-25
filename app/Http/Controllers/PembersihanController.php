@@ -2,64 +2,32 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Pembersihan;
+use App\Http\Controllers\Controller;
+use App\Models\Meja;
 use Illuminate\Http\Request;
 
 class PembersihanController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Menampilkan daftar meja yang belum dibersihkan.
      */
     public function index()
     {
-        //
+        $mejas = Meja::where('status', 'Belum Dibersihkan')->get();
+        return view('admin.pembersihan.index', compact('mejas'));
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Tandai meja sudah dibersihkan.
      */
-    public function create()
+    public function updateStatus($id)
     {
-        //
-    }
+        $meja = Meja::findOrFail($id);
+        $meja->update(['status' => 'Siap Dipakai']);
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
+        // Broadcast event realtime untuk update status meja
+        broadcast(new \App\Events\MejaDibersihkanEvent($meja))->toOthers();
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Pembersihan $pembersihan)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Pembersihan $pembersihan)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Pembersihan $pembersihan)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Pembersihan $pembersihan)
-    {
-        //
+        return redirect()->back()->with('success', "Meja {$meja->nomor} siap dipakai kembali");
     }
 }

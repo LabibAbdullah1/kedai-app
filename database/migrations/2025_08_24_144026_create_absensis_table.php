@@ -11,12 +11,15 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('absensi', function (Blueprint $table) {
+          Schema::create('absensis', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->date('tanggal');
             $table->time('jam_masuk')->nullable();
-            $table->time('jam_keluar')->nullable();
+            $table->time('jam_pulang')->nullable();
+            $table->boolean('lembur')->default(false);
+            $table->integer('jam_lembur')->default(0);
+            $table->enum('status', ['hadir', 'pulang', 'izin', 'cuti'])->default('hadir');
             $table->timestamps();
         });
     }

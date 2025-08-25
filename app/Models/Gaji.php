@@ -7,21 +7,23 @@ use Illuminate\Database\Eloquent\Model;
 
 class Gaji extends Model
 {
-    use HasFactory;
-
     protected $table = 'gaji';
+    use HasFactory;
 
     protected $fillable = [
         'user_id',
+        'total_hadir',
+        'total_jam_kerja',
+        'total_lembur',
         'gaji_pokok',
-        'lembur',
+        'uang_lembur',
         'total_gaji',
-        'bulan'
+        'periode_gaji',
+        'status',
     ];
 
-    // Gaji milik karyawan tertentu
     public function user()
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(User::class);
     }
 }

@@ -3,63 +3,67 @@
 namespace App\Http\Controllers;
 
 use App\Models\Pesanan;
+use App\Models\PesananDetail;
+use App\Models\Menu;
+use App\Models\Dapur;
 use Illuminate\Http\Request;
+use App\Events\PesananBaru;
 
 class PesananController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
+        $pesanan = Pesanan::with(['pelanggan', 'detail.menu'])->latest()->get();
+        $menu = Menu::where('status', 'tersedia')->get();
+
+        return view('pesanan.index', compact('pesanan', 'menu'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
-    }
+        $request->validate([
+            'pelanggan_id' => 'required',
+            'meja_id' => 'required',
+            'waiter_id' => 'required',
+            'menu_id' => 'required|array',
+            'qty' => 'required|array'
+        ]);
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Pesanan $pesanan)
-    {
-        //
-    }
+        $pesanan = Pesanan::create([
+            'pelanggan_id' => $request->pelanggan_id,
+            'meja_id' => $request->meja_id,
+            'waiter_id' => $request->waiter_id,
+            'total_harga' => 0,
+            'status' => 'pending'
+        ]);
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Pesanan $pesanan)
-    {
-        //
-    }
+        $total = 0;
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Pesanan $pesanan)
-    {
-        //
-    }
+        foreach ($request->menu_id as $index => $menuId) {
+            $menu = Menu::findOrFail($menuId);
+            $subtotal = $menu->harga * $request->qty[$index];
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Pesanan $pesanan)
-    {
-        //
+            PesananDetail::create([
+                'pesanan_id' => $pesanan->id,
+                'menu_id' => $menuId,
+                'qty' => $request->qty[$index],
+                'subtotal' => $subtotal
+            ]);
+
+            $total += $subtotal;
+        }
+
+        $pesanan->update(['total_harga' => $total]);
+
+        Dapur::create([
+            'pesanan_id' => $pesanan->id,
+            'koki_id' => null,
+            'status' => 'pending'
+        ]);
+
+        // Kirim notifikasi ke koki realtime
+        broadcast(new PesananBaru($pesanan))->toOthers();
+
+        return redirect()->back()->with('success', 'Pesanan berhasil dibuat');
     }
 }
